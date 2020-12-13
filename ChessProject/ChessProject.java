@@ -35,7 +35,7 @@ public class ChessProject extends JFrame implements MouseListener, MouseMotionLi
     public ChessProject() {
         Dimension boardSize = new Dimension(600, 600);
 
-       champion=null;
+        champion=null;
         //  Use a Layered Pane for this application
         layeredPane = new JLayeredPane();
         getContentPane().add(layeredPane);
@@ -892,63 +892,63 @@ public class ChessProject extends JFrame implements MouseListener, MouseMotionLi
   method).
 */
     private Stack getWhitePawnSquares(int x, int y, String piece) {
-            Square startingSquare = new Square(x, y, piece);
-            Stack moves = new Stack();
-            Move validM, validM1, validM2, validM3;
-            int tmpx1 = x + 1;
-            int tmpx2 = x - 1;
-            int tmpy1 = y + 1;
-            int tmpy2 = y + 2;
-            // moves for pawn
-            Square tmp = new Square(x, tmpy1, piece); //down one
-            Square tmp1 = new Square(tmpx1, tmpy1, piece); //right + down one
-            Square tmp2 = new Square(tmpx2, tmpy1, piece); //left + down one
-            Square tmp3 = new Square(x, tmpy2, piece); //down two
-            if (y == 1) {
-                validM1 = new Move(startingSquare, tmp3);
-                if (!piecePresent(((tmp3.getXC() * 75) + 20), (((tmp3.getYC() * 75) + 20))) && !piecePresent(((tmp.getXC() * 75) + 20), (((tmp.getYC() * 75) + 20)))) {
-                    moves.push(validM1);
-                } else {
-                    if (!(tmpx1 > 7)) {
-                        if (piecePresent(((tmp1.getXC() * 75) + 20), (((tmp1.getYC() * 75) + 20)))) {
-                            if (checkWhiteOponent(((tmp1.getXC() * 75) + 20), (((tmp1.getYC() * 75) + 20)))) {
-                                moves.push(validM1);
-                            }
-                        }
-                    }
-                    if (!(tmpx2 < 0)) {
-                        if (piecePresent(((tmp2.getXC() * 75) + 20), (((tmp2.getYC() * 75) + 20)))) {
-                            if (checkWhiteOponent(((tmp2.getXC() * 75) + 20), (((tmp2.getYC() * 75) + 20)))) {
-                                moves.push(validM1);
-                            }
-                        }
-                    }
-                }
-            }
-            if (!(tmpy1 > 7)) {
-                validM = new Move(startingSquare, tmp);
-                if (!piecePresent(((tmp.getXC() * 75) + 20), (((tmp.getYC() * 75) + 20)))) {
-                    moves.push(validM);
-                }
+        Square startingSquare = new Square(x, y, piece);
+        Stack moves = new Stack();
+        Move validM, validM1, validM2, validM3;
+        int tmpx1 = x + 1;
+        int tmpx2 = x - 1;
+        int tmpy1 = y + 1;
+        int tmpy2 = y + 2;
+        // moves for pawn
+        Square tmp = new Square(x, tmpy1, piece); //down one
+        Square tmp1 = new Square(tmpx1, tmpy1, piece); //right + down one
+        Square tmp2 = new Square(tmpx2, tmpy1, piece); //left + down one
+        Square tmp3 = new Square(x, tmpy2, piece); //down two
+        if (y == 1) {
+            validM1 = new Move(startingSquare, tmp3);
+            if (!piecePresent(((tmp3.getXC() * 75) + 20), (((tmp3.getYC() * 75) + 20))) && !piecePresent(((tmp.getXC() * 75) + 20), (((tmp.getYC() * 75) + 20)))) {
+                moves.push(validM1);
+            } else {
                 if (!(tmpx1 > 7)) {
-                    validM2 = new Move(startingSquare, tmp1);
                     if (piecePresent(((tmp1.getXC() * 75) + 20), (((tmp1.getYC() * 75) + 20)))) {
                         if (checkWhiteOponent(((tmp1.getXC() * 75) + 20), (((tmp1.getYC() * 75) + 20)))) {
-                            moves.push(validM2);
+                            moves.push(validM1);
                         }
                     }
                 }
                 if (!(tmpx2 < 0)) {
-                    validM3 = new Move(startingSquare, tmp2);
                     if (piecePresent(((tmp2.getXC() * 75) + 20), (((tmp2.getYC() * 75) + 20)))) {
                         if (checkWhiteOponent(((tmp2.getXC() * 75) + 20), (((tmp2.getYC() * 75) + 20)))) {
-                            moves.push(validM3);
+                            moves.push(validM1);
                         }
                     }
                 }
             }
-            return moves;
         }
+        if (!(tmpy1 > 7)) {
+            validM = new Move(startingSquare, tmp);
+            if (!piecePresent(((tmp.getXC() * 75) + 20), (((tmp.getYC() * 75) + 20)))) {
+                moves.push(validM);
+            }
+            if (!(tmpx1 > 7)) {
+                validM2 = new Move(startingSquare, tmp1);
+                if (piecePresent(((tmp1.getXC() * 75) + 20), (((tmp1.getYC() * 75) + 20)))) {
+                    if (checkWhiteOponent(((tmp1.getXC() * 75) + 20), (((tmp1.getYC() * 75) + 20)))) {
+                        moves.push(validM2);
+                    }
+                }
+            }
+            if (!(tmpx2 < 0)) {
+                validM3 = new Move(startingSquare, tmp2);
+                if (piecePresent(((tmp2.getXC() * 75) + 20), (((tmp2.getYC() * 75) + 20)))) {
+                    if (checkWhiteOponent(((tmp2.getXC() * 75) + 20), (((tmp2.getYC() * 75) + 20)))) {
+                        moves.push(validM3);
+                    }
+                }
+            }
+        }
+        return moves;
+    }
 
     /*
       Method to check if there is a BlackKing in the surrounding squares of a given Square.
@@ -1727,9 +1727,9 @@ So now we should have a copy of all the possible moves to make in our Stack call
             Move selectedMove;
             switch (gameOption){
                 case 1: selectedMove=agent.nextBestMove(completeWhiteMoves,black);
-                break;
+                    break;
                 case 2: selectedMove=agent.twoLevelsDeep(completeWhiteMoves);
-                break;
+                    break;
                 default: selectedMove = agent.randomMove(completeWhiteMoves);
             }
 
