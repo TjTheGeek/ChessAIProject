@@ -9,7 +9,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JFrame;
 /*
-	This class can be used as a starting point for creating your Chess game project. The only piece that 
+	This class can be used as a starting point for creating your Chess game project. The only piece that
 	has been coded is a white pawn...a lot done, more to do!
 */
 
@@ -29,13 +29,13 @@ public class ChessProject extends JFrame implements MouseListener, MouseMotionLi
     boolean agentwins;
     AIAgent agent;
     Boolean white2Move;
-
-
-
+    String champion;
+    private static int gameOption;
 
     public ChessProject() {
         Dimension boardSize = new Dimension(600, 600);
 
+       champion=null;
         //  Use a Layered Pane for this application
         layeredPane = new JLayeredPane();
         getContentPane().add(layeredPane);
@@ -125,7 +125,6 @@ public class ChessProject extends JFrame implements MouseListener, MouseMotionLi
         agent = new AIAgent();
         white2Move = true;
     }
-
     /*
         This method checks if there is a piece present on a particular square.
     */
@@ -137,21 +136,21 @@ public class ChessProject extends JFrame implements MouseListener, MouseMotionLi
             return true;
         }
     }
-
     /*
         This is a method to check if a piece is a Black piece.
     */
     private Boolean checkWhiteOpponent(int newX, int newY) {
-        Boolean oponent;
+        Boolean opponent;
         Component c1 = chessBoard.findComponentAt(newX, newY);
         JLabel awaitingPiece = (JLabel) c1;
         String tmp1 = awaitingPiece.getIcon().toString();
         if (((tmp1.contains("Black")))) {
-            oponent = true;
+            opponent = true;
         } else {
-            oponent = false;
+            opponent = false;
         }
-        return oponent;
+        return opponent;
+
     }
 
     /*
@@ -190,7 +189,9 @@ public class ChessProject extends JFrame implements MouseListener, MouseMotionLi
         if (chessPiece == null) return;
 
         chessPiece.setVisible(false);
-        Boolean success = false;
+        Boolean success=false;
+        Boolean promote= false;
+
         Component c = chessBoard.findComponentAt(e.getX(), e.getY());
         String tmp = chessPiece.getIcon().toString();
         String pieceName = tmp.substring(0, (tmp.length() - 4));
@@ -208,6 +209,17 @@ public class ChessProject extends JFrame implements MouseListener, MouseMotionLi
         System.out.println("The Y Movement is  " + yMovement);
         System.out.println("The Landing Coordinate are " + "(" + landingX + "," + landingY + ")");
 
+        boolean possible=false;
+        if(white2Move){
+            if(pieceName.contains("White")){
+                possible=true;
+            }
+        }else{
+            if(pieceName.contains("Black")){
+                possible=true;
+            }
+        }
+        if(possible) {
 		/*
 			The only piece that has been enabled to move is a White Pawn...but we should really have this is a separate
 			method somewhere...how would this work.
@@ -219,454 +231,519 @@ public class ChessProject extends JFrame implements MouseListener, MouseMotionLi
 			If a Pawn makes it to the top of the other side, the Pawn can turn into any other piece, for
 			demonstration purposes the Pawn here turns into a Queen.
 		*/
-        if (pieceName.equals("WhitePawn")) {
-            if (landingX < 0 || landingX > 7 || landingY < 0 || landingY > 7) {
-                validMove = false;
-            } else {
-                if (startY == 1) {
-                    if ((startX == landingX) && (((landingY - startY) == 1) || ((landingY - startY) == 2))) {//if im going straight
-                        if (!piecePresent(landingX * 75, landingY * 75)) {//if there is no piece in that land area then..
-                            validMove = true;
-                        } else {
+            if (pieceName.equals("BlackPawn")) {
+                if (landingX < 0 || landingX > 7 || landingY < 0 || landingY > 7) {
+                    validMove = false;
+                } //keeps pieces on the board
+                else {
+                    if (startY == 6) {
+                        //if going in a straight line
+                        if ((startX == landingX) && (((landingY - startY) == -1) || (landingY - startY) == -2)) {//if im going straight
+                            if (!piecePresent(landingX * 75, landingY * 75)) {//if there is no piece in that land area then..
+                                validMove = true;
+                            } else {
+                                validMove = false;
+                            }
+                        }//going straight on first move
+                        else if ((startX - 1 == landingX) && (startY - 1 == landingY)) {//diagonal left
+                            if (piecePresent(landingX * 75, landingY * 75)) {
+                                if (!checkWhiteOponent(landingX * 75, landingY * 75)) {
+                                    validMove = true;
+                                    if(landingY==0){
+                                        promote=true;
+                                    }
+                                    if(getPieceName(e.getX(),e.getY()).contains("King")){
+                                        champion = "The Player has won the game!";
+                                    }
+
+                                } else validMove = false;
+                            }
+                            else validMove = false;
+                        }
+                        else if ((startX + 1 == landingX) && (startY - 1 == landingY)) {
+                            if (piecePresent(landingX * 75, landingY * 75)) {
+                                if (!checkWhiteOponent(landingX * 75, landingY * 75)) {
+                                    validMove = true;
+                                    if(landingY==0){
+                                        promote=true;
+                                    }
+                                    if(getPieceName(e.getX(),e.getY()).contains("King")){
+                                        champion = "The Player has won the game!";
+                                    }
+                                } else validMove = false;
+                            }
+                            else validMove = false;
+                        }
+                        else validMove = false;
+                    } //at the starting position
+
+                    else {//not in starting position
+                        if ((startX == landingX) && (startY - landingY == 1)) {//straight 1 valid move and no piece present
+                            if (!piecePresent(landingX * 75, landingY * 75)) {//if there is no piece in that land area then..
+                                validMove = true;
+                                if(landingY==0){
+                                    promote=true;
+                                }
+                            } else validMove = false;
+                        } //going stright after first move
+                        else if ((startX - landingX ==1) && (startY -landingY ==1)) {//diagonal left
+                            if (piecePresent(landingX * 75, landingY * 75)) {
+                                if (!checkWhiteOponent(landingX * 75, landingY * 75)) {
+
+                                    validMove = true;
+                                    if(landingY==0){
+                                        promote=true;
+                                    }
+                                    if(getPieceName(e.getX(),e.getY()).contains("King")){
+                                        champion = "The Player has won the game!";
+                                    }
+                                }
+                                else validMove = false;
+                            }
+
+                            else validMove = false;
+                        }
+
+                        else if ((startX + 1 == landingX) && (startY - 1 == landingY)) {//diagonal to the right
+                            if (piecePresent(landingX * 75, landingY * 75)) {
+                                if (!checkWhiteOponent(landingX * 75, landingY * 75)) {
+                                    validMove = true;
+                                    if(landingY==0){
+                                        promote=true;
+                                    }
+                                    if(getPieceName(e.getX(),e.getY()).contains("King")){
+                                        champion = "The Player has won the game!";
+                                    }
+                                } else validMove = false;
+                            }
+                            else validMove = false;
+                        }
+                        else validMove = false;
+                    }
+                }
+            }
+
+
+            else if (pieceName.equals("WhitePawn")) {
+                if (landingX < 0 || landingX > 7 || landingY < 0 || landingY > 7) {
+                    validMove = false;
+                }
+
+                else {
+                    if (startY == 1) {
+                        if ((startX == landingX) && (((landingY - startY) == 1) || ((landingY - startY) == 2))) {//if im going straight
+                            if (!piecePresent(landingX * 75, landingY * 75)) {//if there is no piece in that land area then..
+                                validMove = true;
+                                if(landingY==7){
+                                    success=true;
+                                }
+
+                            }
+                            else {
+                                validMove = false;
+                            }
+                        }
+                        else if ((startX - 1 == landingX) && (startY + 1 == landingY)) {//diagonal left
+                            if (piecePresent(landingX * 75, landingY * 75)) {
+                                if (checkWhiteOpponent(landingX * 75, landingY * 75)) {
+                                    validMove = true;
+                                    if(landingY==7){
+                                        success=true;
+                                    }
+                                    if(getPieceName(e.getX(),e.getY()).contains("King")){
+                                        champion = "The AI has won the game!";
+                                    }
+
+                                } else validMove = false;
+                            } else validMove = false;
+                        }
+                        else if ((startX + 1 == landingX) && (startY + 1 == landingY)) {//diagonally right
+                            if (piecePresent(landingX * 75, landingY * 75)) {
+                                if (checkWhiteOpponent(landingX * 75, landingY * 75)) {
+                                    validMove = true;
+                                    if(getPieceName(e.getX(),e.getY()).contains("King")){
+                                        champion = "The AI has won the game!";
+                                    }
+                                    if(landingY==7){
+                                        success=true;
+                                    }
+                                } else validMove = false;
+                            } else validMove = false;
+                        } else validMove = false;
+                    }//at the start
+                    else {//not starting position
+                        if ((startX == landingX) && (startY - landingY == -1)) {//straight 1 valid move and no piece present
+                            if (!piecePresent(landingX * 75, landingY * 75)) {//if there is no piece in that land area then..
+                                validMove = true;
+                            } else validMove = false;
+                        }
+                        else if ((startX - 1 == landingX) && (startY + 1 == landingY)) {//diagonal left
+                            if (piecePresent(landingX * 75, landingY * 75)) {
+                                if (checkWhiteOpponent(landingX * 75, landingY * 75)) {
+                                    validMove = true;
+                                    if (landingY == 7) {
+                                        success = true;
+                                    }
+                                    if(getPieceName(e.getX(),e.getY()).contains("King")){
+                                        champion = "The AI has won the game!";
+                                    }
+                                } else validMove = false;
+                            }
+                            else validMove = false;
+                        }//diagonally left
+                        else if ((startX + 1 == landingX) && (startY + 1 == landingY)) {
+                            if (piecePresent(landingX * 75, landingY * 75)) {
+                                if (checkWhiteOpponent(landingX * 75, landingY * 75)) {
+                                    validMove = true;
+                                    if (landingY == 7) {
+                                        success = true;
+                                    }
+                                    if(getPieceName(e.getX(),e.getY()).contains("King")){
+                                        champion = "The AI has won the game!";
+                                    }
+                                } else validMove = false;
+                            } else validMove = false;
+                        } //diagonally right
+
+                        else validMove = false;
+                    }
+                }
+            }
+            else if (pieceName.equals("BlackKnight")) {
+                if (landingX < 0 || landingX > 7 || landingY < 0 || landingY > 7) {
+                    validMove = false;
+                } else {
+                    if ((((landingX - startX == -1) && ((landingY - startY == -2) || (landingY - startY == 2))) || ((landingX - startX == 1) && ((landingY - startY == -2) || (landingY - startY == 2))) || ((landingX - startX == -2) && ((landingY - startY == -1) || (landingY - startY == 1))) || ((landingX - startX == 2) && ((landingY - startY == -1) || (landingY - startY == 1))))) {
+                        if (piecePresent(landingX * 75, landingY * 75)) {
+                            if (!checkWhiteOpponent(landingX * 75, landingY * 75)) {
+                                validMove = true;
+                            } else validMove = false;
+                        } else validMove = true;
+                    } else validMove = false;
+                }
+            }
+            else if (pieceName.equals("WhiteKnight")) {
+                if (landingX < 0 || landingX > 7 || landingY < 0 || landingY > 7) {
+                    validMove = false;
+                }
+
+                else {
+                    if ((((landingX - startX == -1) && ((landingY - startY == -2) || (landingY - startY == 2))) || ((landingX - startX == 1) && ((landingY - startY == -2) || (landingY - startY == 2))) || ((landingX - startX == -2) && ((landingY - startY == -1) || (landingY - startY == 1))) || ((landingX - startX == 2) && ((landingY - startY == -1) || (landingY - startY == 1))))) {
+                        if (piecePresent(landingX * 75, landingY * 75)) {
+                            if (checkWhiteOpponent(landingX * 75, landingY * 75)) {
+                                validMove = true;
+                                if(getPieceName(e.getX(),e.getY()).contains("King")){
+                                    champion = "The AI has won the game!";
+                                }
+                            } else validMove = false;
+                        } else validMove = true;
+                    }
+                    else validMove = false;
+                }
+            }
+            else if (pieceName.contains("Rook")) {
+                boolean inTheWay = false;
+                if (landingX < 0 || landingX > 7 || landingY < 0 || landingY > 7) {
+                    validMove = false;
+                }
+                else {
+                    if ((Math.abs(startX - landingX) != 0) && (startY == landingY) || (startX == landingX) && (Math.abs(startY - landingY) != 0)) {
+                        if (Math.abs(startX - landingX) != 0) {//if it move sideways
+                            if (startX - landingX > 0) {//moves left
+                                for (int i = 0; i < xMovement; i++) {
+                                    if (piecePresent(initialX - (i * 75), landingY * 75)) {
+                                        inTheWay = true;
+                                        break;
+                                    } else inTheWay = false;
+                                }
+                            } else {//moved to the right
+                                for (int i = 0; i < xMovement; i++) {
+                                    if (piecePresent(initialX + (i * 75), landingY * 75)) {
+                                        inTheWay = true;
+                                        break;
+                                    } else inTheWay = false;
+                                }
+                            }
+                        }
+                        else {//up and down movement
+                            if (startY - landingY > 0) {//black towards white
+                                for (int i = 0; i < yMovement; i++) {
+                                    if (piecePresent(landingX * 75, initialY - (i * 75))) {
+                                        inTheWay = true;
+                                        break;
+
+                                    } else inTheWay = false;
+                                }
+                            } else {
+                                for (int i = 0; i < yMovement; i++) {
+                                    if (piecePresent(landingX * 75, initialY + (i * 75))) {
+                                        inTheWay = true;
+                                        break;
+                                    } else inTheWay = false;
+                                }
+                            }
+                        }
+
+                        if (inTheWay) {
                             validMove = false;
                         }
-                    } else if ((startX - 1 == landingX) && (startY + 1 == landingY)) {//diagonal left
-                        if (piecePresent(landingX * 75, landingY * 75)) {
-                            if (checkWhiteOpponent(landingX * 75, landingY * 75)) {
-                                validMove = true;
-                            } else validMove = false;
-                        } else validMove = false;
-                    } else if ((startX + 1 == landingX) && (startY + 1 == landingY)) {//diagonally right
-                        if (piecePresent(landingX * 75, landingY * 75)) {
-                            if (checkWhiteOpponent(landingX * 75, landingY * 75)) {
-                                validMove = true;
-                            } else validMove = false;
-                        } else validMove = false;
-                    } else validMove = false;
-                } else {//not starting position
-                    if ((startX == landingX) && (startY - landingY == -1)) {//straight 1 valid move and no piece present
-                        if (!piecePresent(landingX * 75, landingY * 75)) {//if there is no piece in that land area then..
-                            validMove = true;
-                        } else validMove = false;
-                    } else if ((startX - 1 == landingX) && (startY + 1 == landingY)) {//diagonal left
-                        if (piecePresent(landingX * 75, landingY * 75)) {
-                            if (checkWhiteOpponent(landingX * 75, landingY * 75)) {
-                                validMove = true;
-                            } else validMove = false;
-                        } else validMove = false;
+                        else {
+                            if (piecePresent(landingX * 75, landingY * 75)) {
+                                if (pieceName.contains("White")) {
+                                    if (checkWhiteOpponent(landingX * 75, landingY * 75)) {
+                                        validMove = true;
+                                        if(getPieceName(e.getX(),e.getY()).contains("King")){
+                                            champion = "The AI has won the game!";
+                                        }
 
+                                    } else validMove = false;
+                                }
+                                else {
+                                    if (!checkWhiteOpponent(landingX * 75, landingY * 75)) {
+                                        validMove = true;
+                                        if(getPieceName(e.getX(),e.getY()).contains("King")){
+                                            champion = "The Player has won the game!";
+                                        }
+                                    } else validMove = false;
+                                }
+                            } else validMove = true;
+                        }
+                    }
+                    else validMove = false;
+                }
+            }
+            else if (pieceName.contains("Bishop")) {
+                boolean inTheWay = false;
+                if (landingX < 0 || landingX > 7 || landingY < 0 || landingY > 7) {
+                    validMove = false;
+                }
 
-                    } else if ((startX + 1 == landingX) && (startY + 1 == landingY)) {
-                        if (piecePresent(landingX * 75, landingY * 75)) {
-                            if (checkWhiteOpponent(landingX * 75, landingY * 75)) {
-                                validMove = true;
-                            } else validMove = false;
-                        } else validMove = false;
+                else {
+                    if (xMovement == yMovement) {
+                        if ((startX - landingX < 0) && (startY - landingY < 0)) {//white to black side to the right (\)
+                            for (int i = 0; i < xMovement; i++) {
+                                if (piecePresent(initialX + (i * 75), initialY + (i * 75))) {
+                                    inTheWay = true;
+                                } else inTheWay = false;
+                            }
+                        }
+                        else if ((startX - landingX > 0) && (startY - landingY < 0)) {//white to black side to the left (/)
+                            for (int i = 0; i < xMovement; i++) {
+                                if (piecePresent(initialX - (i * 75), initialY + (i * 75))) {
+                                    inTheWay = true;
+
+                                } else inTheWay = false;
+                            }
+                        }
+                        else if ((startX - landingX) > 0 && (startY - landingY) > 0) {//black to white going to the left(\)
+                            for (int i = 0; i < xMovement; i++) {
+                                if (piecePresent(initialX - (i * 75), initialY - (i * 75))) {
+                                    inTheWay = true;
+                                } else inTheWay = false;
+                            }
+                        }
+                        else {//black to white to the right(/)
+                            for (int i = 0; i < xMovement; i++) {
+                                if (piecePresent(initialX + (i * 75), initialY - (i * 75))) {
+                                    inTheWay = true;
+                                } else inTheWay = false;
+                            }
+                        }
+
+                        if (inTheWay) {
+                            validMove = false;
+                        } else {
+                            if (piecePresent(landingX * 75, landingY * 75)) {
+                                if (pieceName.contains("White")) {
+                                    if (checkWhiteOpponent(landingX * 75, landingY * 75)) {
+                                        if(getPieceName(e.getX(),e.getY()).contains("King")){
+                                            champion = "The AI has won the game!";
+                                        }
+                                        validMove = true;
+                                    }
+                                    else validMove = false;
+                                }
+                                else {
+                                    if (!checkWhiteOpponent(landingX * 75, landingY * 75)) {
+                                        validMove = true;
+                                        if(getPieceName(e.getX(),e.getY()).contains("King")){
+                                            champion = "The Player has won the game!";
+                                        }
+                                    } else validMove = false;
+                                }
+                            } else validMove = true;
+                        }
                     } else validMove = false;
                 }
             }
-        }
-        ///
-        else if (pieceName.equals("BlackPawn")) {
-            if (landingX < 0 || landingX > 7 || landingY < 0 || landingY > 7) {
-                validMove = false;
-            } else {
-                if (startY == 6) {
-                    //if going in a straight line
-                    if ((startX == landingX) && (((landingY - startY) == -1) || (landingY - startY) == -2)) {//if im going straight
-                        if (!piecePresent(landingX * 75, landingY * 75)) {//if there is no piece in that land area then..
-                            validMove = true;
-                        } else {
+            else if (pieceName.contains("Queen")) {
+                boolean inTheWay = false;
+                if (landingX < 0 || landingX > 7 || landingY < 0 || landingY > 7) {
+                    validMove = false;
+                }
+
+                else {
+                    if ((Math.abs(startX - landingX) != 0) && (startY == landingY) || (startX == landingX) && (Math.abs(startY - landingY) != 0)) {
+                        if (Math.abs(startX - landingX) != 0) {//if it move sideways
+                            if (startX - landingX > 0) {//moves left
+                                for (int i = 0; i < xMovement; i++) {
+                                    if (piecePresent(initialX - (i * 75), landingY * 75)) {
+                                        inTheWay = true;
+                                        break;
+                                    } else inTheWay = false;
+                                }
+                            }
+                            else {//moved to the right
+                                for (int i = 0; i < xMovement; i++) {
+                                    if (piecePresent(initialX + (i * 75), landingY * 75)) {
+                                        inTheWay = true;
+                                        break;
+                                    } else inTheWay = false;
+                                }
+                            }
+                        } else {//up and down movement
+                            if (startY - landingY > 0) {//black towards white
+                                for (int i = 0; i < yMovement; i++) {
+                                    if (piecePresent(landingX * 75, initialY - (i * 75))) {
+                                        inTheWay = true;
+                                        break;
+                                    } else inTheWay = false;
+                                }
+                            }
+                            else {
+                                for (int i = 0; i < yMovement; i++) {
+                                    if (piecePresent(landingX * 75, initialY + (i * 75))) {
+                                        inTheWay = true;
+                                        break;
+                                    } else inTheWay = false;
+                                }
+                            }
+                        }
+
+                        if (inTheWay) {
                             validMove = false;
                         }
-                    }//going straight on first move
-                    else if ((startX - 1 == landingX) && (startY - 1 == landingY)) {//diagonal left
-                        if (piecePresent(landingX * 75, landingY * 75)) {
-                            if (!checkWhiteOpponent(landingX * 75, landingY * 75)) {
-                                validMove = true;
-                            } else validMove = false;
-                        } else validMove = false;
-                    } else if ((startX + 1 == landingX) && (startY - 1 == landingY)) {
-                        if (piecePresent(landingX * 75, landingY * 75)) {
-                            if (!checkWhiteOpponent(landingX * 75, landingY * 75)) {
-                                validMove = true;
-                            } else validMove = false;
-                        } else validMove = false;
-                    } else validMove = false;
-                } else {//not in starting position
-                    if ((startX == landingX) && (startY - landingY == 1)) {//straight 1 valid move and no piece present
-                        if (!piecePresent(landingX * 75, landingY * 75)) {//if there is no piece in that land area then..
-                            validMove = true;
-                        } else validMove = false;
-                    } //going stright after first move
-                    else if ((startX - 1 == landingX) && (startY - 1 == landingY)) {//diagonal left
-                        if (piecePresent(landingX * 75, landingY * 75)) {
-                            if (!checkWhiteOpponent(landingX * 75, landingY * 75)) {
-                                validMove = true;
-                            } else validMove = false;
-                        } else validMove = false;
-                    } else if ((startX + 1 == landingX) && (startY - 1 == landingY)) {
-                        if (piecePresent(landingX * 75, landingY * 75)) {
-                            if (!checkWhiteOpponent(landingX * 75, landingY * 75)) {
-                                validMove = true;
-                            } else validMove = false;
-                        } else validMove = false;
-                    } else validMove = false;
-                }
-            }
-        }
-        ///
-        else if (pieceName.equals("BlackKnight")) {
-            if (landingX < 0 || landingX > 7 || landingY < 0 || landingY > 7) {
-                validMove = false;
-            } else {
-                if ((((landingX - startX == -1) && ((landingY - startY == -2) || (landingY - startY == 2))) || ((landingX - startX == 1) && ((landingY - startY == -2) || (landingY - startY == 2))) || ((landingX - startX == -2) && ((landingY - startY == -1) || (landingY - startY == 1))) || ((landingX - startX == 2) && ((landingY - startY == -1) || (landingY - startY == 1))))) {
-                    if (piecePresent(landingX * 75, landingY * 75)) {
-                        if (!checkWhiteOpponent(landingX * 75, landingY * 75)) {
-                            validMove = true;
-                        } else validMove = false;
-                    } else validMove = true;
-                } else validMove = false;
-            }
-        }
-        ///
-        else if (pieceName.equals("WhiteKnight")) {
-            if (landingX < 0 || landingX > 7 || landingY < 0 || landingY > 7) {
-                validMove = false;
-            } else {
-                if ((((landingX - startX == -1) && ((landingY - startY == -2) || (landingY - startY == 2))) || ((landingX - startX == 1) && ((landingY - startY == -2) || (landingY - startY == 2))) || ((landingX - startX == -2) && ((landingY - startY == -1) || (landingY - startY == 1))) || ((landingX - startX == 2) && ((landingY - startY == -1) || (landingY - startY == 1))))) {
-                    if (piecePresent(landingX * 75, landingY * 75)) {
-                        if (checkWhiteOpponent(landingX * 75, landingY * 75)) {
-                            validMove = true;
-                        } else validMove = false;
-                    } else validMove = true;
-                } else validMove = false;
-            }
-        }
-        ///
-        else if (pieceName.contains("Rook")) {
-            boolean inTheWay = false;
-            if (landingX < 0 || landingX > 7 || landingY < 0 || landingY > 7) {
-                validMove = false;
-            }
-
-            else{
-                if ((Math.abs(startX-landingX)!=0)&&(startY==landingY)||(startX==landingX)&& (Math.abs(startY-landingY)!=0)){
-                    if (Math.abs(startX-landingX)!=0){//if it move sideways
-                        if(startX-landingX>0){//moves left
-                            for (int i=0;i<xMovement;i++){
-                                if (piecePresent(initialX-(i*75),landingY*75)){
-                                    inTheWay=true;
-                                    break;
+                        else {
+                            if (piecePresent(landingX * 75, landingY * 75)) {
+                                if (pieceName.contains("White")) {
+                                    if (checkWhiteOpponent(landingX * 75, landingY * 75)) {
+                                        validMove = true;
+                                        if(getPieceName(e.getX(),e.getY()).contains("King")){
+                                            champion = "The AI has won the game!";
+                                        }
+                                    } else validMove = false;
+                                } else {
+                                    if (!checkWhiteOpponent(landingX * 75, landingY * 75)) {
+                                        validMove = true;
+                                        if(getPieceName(e.getX(),e.getY()).contains("King")){
+                                            champion = "The Player has won the game!";
+                                        }
+                                    } else validMove = false;
                                 }
-                                else inTheWay=false;
-                            }
-                        }
-                        else {//moved to the right
-                            for (int i=0;i<xMovement;i++){
-                                if (piecePresent(initialX+(i*75),landingY*75)){
-                                    inTheWay=true;
-                                    break;
-                                }
-                                else inTheWay=false;
-                            }
+                            } else validMove = true;
                         }
                     }
-                    else{//up and down movement
-                        if (startY-landingY>0){//black towards white
-                            for (int i=0;i<yMovement;i++){
-                                if (piecePresent(landingX*75,initialY-(i*75))){
-                                    inTheWay=true;
-                                    break;
-                                }
-                                else inTheWay=false;
+                    else if ((startX == landingX) && (startY == landingY)) {
+                        validMove = false;
+                    } else if (xMovement == yMovement) {
+                        if ((startX - landingX < 0) && (startY - landingY < 0)) {//white to black side to the right (\)
+                            for (int i = 0; i < xMovement; i++) {
+                                if (piecePresent(initialX + (i * 75), initialY + (i * 75))) {
+                                    inTheWay = true;
+                                } else inTheWay = false;
                             }
+                        } else if ((startX - landingX > 0) && (startY - landingY < 0)) {//white to black side to the left (/)
+                            for (int i = 0; i < xMovement; i++) {
+                                if (piecePresent(initialX - (i * 75), initialY + (i * 75))) {
+                                    inTheWay = true;
+
+                                } else inTheWay = false;
+                            }
+                        } else if ((startX - landingX) > 0 && (startY - landingY) > 0) {//black to white going to the left(\)
+                            for (int i = 0; i < xMovement; i++) {
+                                if (piecePresent(initialX - (i * 75), initialY - (i * 75))) {
+                                    inTheWay = true;
+                                } else inTheWay = false;
+                            }
+                        } else {//black to white to the right(/)
+                            for (int i = 0; i < xMovement; i++) {
+                                if (piecePresent(initialX + (i * 75), initialY - (i * 75))) {
+                                    inTheWay = true;
+                                } else inTheWay = false;
+                            }
+                        }
+
+                        if (inTheWay) {
+                            validMove = false;
+                        } else {
+                            if (piecePresent(landingX * 75, landingY * 75)) {
+                                if (pieceName.contains("White")) {
+                                    if (checkWhiteOpponent(landingX * 75, landingY * 75)) {
+                                        validMove = true;
+                                        if(getPieceName(e.getX(),e.getY()).contains("King")){
+                                            champion = "The Ai has won the game!";
+                                        }
+                                    } else validMove = false;
+                                } else {
+                                    if (!checkWhiteOpponent(landingX * 75, landingY * 75)) {
+                                        validMove = true;
+                                        if(getPieceName(e.getX(),e.getY()).contains("King")){
+                                            champion = "The Player has won the game!";
+                                        }
+                                    } else validMove = false;
+                                }
+                            } else validMove = true;
+                        }
+                    } else validMove = false;
+
+                }
+
+            }
+            else if (pieceName.contains("King")) {
+                boolean inTheWay = false;
+                if (landingX < 0 || landingX > 7 || landingY < 0 || landingY > 7) {
+                    validMove = false;
+                }
+                else {
+                    if ((startX == landingX) && (startY == landingY)) {
+                        validMove = false;
+                    }
+                    else if (xMovement < 2 && yMovement < 2) {
+                        if (piecePresent(landingX * 75, landingY * 75)) {
+                            inTheWay = true;
+                        }
+                        else inTheWay = false;
+                        if (inTheWay) {
+                            validMove = false;
                         }
                         else {
-                            for (int i=0;i<yMovement;i++){
-                                if (piecePresent(landingX*75,initialY+(i*75))){
-                                    inTheWay=true;
-                                    break;
+                            if (piecePresent(landingX * 75, landingY * 75)) {
+                                if (pieceName.contains("White")) {
+                                    if (checkWhiteOpponent(landingX * 75, landingY * 75)) {
+                                        validMove = true;
+                                        if(getPieceName(e.getX(),e.getY()).contains("King")){
+                                            champion = "The AI has won the game!";
+                                        }
+                                    } else validMove = false;
+                                } else {
+                                    if (!checkWhiteOpponent(landingX * 75, landingY * 75)) {
+                                        validMove = true;
+                                        if(getPieceName(e.getX(),e.getY()).contains("King")){
+                                            champion = "The Player has won the game!";
+                                        }
+                                    } else validMove = false;
                                 }
-                                else inTheWay=false;
-                            }
+                            } else validMove = true;
                         }
                     }
-
-                    if (inTheWay){
-                        validMove=false;
-                    }
-                    else{
-                        if (piecePresent(landingX*75,landingY*75)){
-                            if (pieceName.contains("White")){
-                                if (checkWhiteOpponent(landingX*75,landingY*75 )){
-                                    validMove=true;
-                                }
-                                else validMove=false;
-                            }
-                            else{
-                                if (!checkWhiteOpponent(landingX*75,landingY*75 )){
-                                    validMove=true;
-                                }
-                                else validMove=false;
-                            }
-                        }
-                        else validMove=true;
-                    }
+                    else validMove = false;
                 }
-                else validMove=false;
-            }
-  }
 
-        else if (pieceName.contains("Bishop")){
-            boolean inTheWay=false;
-            if (landingX < 0 || landingX > 7 || landingY < 0 || landingY > 7) {
-                validMove = false;
             }
 
-            else{
-                if (xMovement==yMovement){
-                    if((startX-landingX<0) && (startY-landingY<0)){//white to black side to the right (\)
-                        for (int i=0;i<xMovement;i++){
-                            if (piecePresent(initialX+(i*75),initialY+(i*75))){
-                                inTheWay=true;
-                            }
-                            else inTheWay=false;
-                        }
-                    }
-                    else if((startX-landingX>0) && (startY-landingY<0)){//white to black side to the left (/)
-                        for (int i=0;i<xMovement;i++){
-                            if (piecePresent(initialX-(i*75),initialY+(i*75))){
-                                inTheWay=true;
-
-                            }
-                            else inTheWay=false;
-                        }
-                    }
-                    else if((startX-landingX)>0 && (startY-landingY)>0){//black to white going to the left(\)
-                        for (int i=0;i<xMovement;i++){
-                            if (piecePresent(initialX-(i*75),initialY-(i*75))){
-                                inTheWay=true;
-                            }
-                            else inTheWay=false;
-                        }
-                    }
-                    else{//black to white to the right(/)
-                        for (int i=0;i<xMovement;i++){
-                            if (piecePresent(initialX+(i*75),initialY-(i*75))){
-                                inTheWay=true;
-                            }
-                            else inTheWay=false;
-                        }
-                    }
-
-                    if (inTheWay){
-                        validMove=false;
-                    }
-                    else{
-                        if (piecePresent(landingX*75,landingY*75)){
-                            if (pieceName.contains("White")){
-                                if (checkWhiteOpponent(landingX*75,landingY*75 )){
-                                    validMove=true;
-                                }
-                                else validMove=false;
-                            }
-                            else{
-                                if (!checkWhiteOpponent(landingX*75,landingY*75 )){
-                                    validMove=true;
-                                }
-                                else validMove=false;
-                            }
-                        }
-                        else validMove=true;
-                    }
-                }
-                else validMove=false;
-            }
+            System.out.println(validMove);
+            System.out.println("---------------------");
         }
-        else if(pieceName.contains("Queen")){
-            boolean inTheWay=false;
-            if (landingX < 0 || landingX > 7 || landingY < 0 || landingY > 7) {
-                validMove = false;
-            }
-           else{
-                if ((Math.abs(startX-landingX)!=0)&&(startY==landingY)||(startX==landingX)&& (Math.abs(startY-landingY)!=0)){
-                    if (Math.abs(startX-landingX)!=0){//if it move sideways
-                        if(startX-landingX>0){//moves left
-                            for (int i=0;i<xMovement;i++){
-                                if (piecePresent(initialX-(i*75),landingY*75)){
-                                    inTheWay=true;
-                                    break;
-                                }
-                                else inTheWay=false;
-                            }
-                        }
-                        else {//moved to the right
-                            for (int i=0;i<xMovement;i++){
-                                if (piecePresent(initialX+(i*75),landingY*75)){
-                                    inTheWay=true;
-                                    break;
-                                }
-                                else inTheWay=false;
-                            }
-                        }
-                    }
-                    else{//up and down movement
-                        if (startY-landingY>0){//black towards white
-                            for (int i=0;i<yMovement;i++){
-                                if (piecePresent(landingX*75,initialY-(i*75))){
-                                    inTheWay=true;
-                                    break;
-                                }
-                                else inTheWay=false;
-                            }
-                        }
-                        else {
-                            for (int i=0;i<yMovement;i++){
-                                if (piecePresent(landingX*75,initialY+(i*75))){
-                                    inTheWay=true;
-                                    break;
-                                }
-                                else inTheWay=false;
-                            }
-                        }
-                    }
-
-                    if (inTheWay){
-                        validMove=false;
-                    }
-                    else{
-                        if (piecePresent(landingX*75,landingY*75)){
-                            if (pieceName.contains("White")){
-                                if (checkWhiteOpponent(landingX*75,landingY*75 )){
-                                    validMove=true;
-                                }
-                                else validMove=false;
-                            }
-                            else{
-                                if (!checkWhiteOpponent(landingX*75,landingY*75 )){
-                                    validMove=true;
-                                }
-                                else validMove=false;
-                            }
-                        }
-                        else validMove=true;
-                    }
-                }
-                else if((startX==landingX) && (startY==landingY)){
-                    validMove=false;
-                }
-                else if (xMovement==yMovement){
-                    if((startX-landingX<0) && (startY-landingY<0)){//white to black side to the right (\)
-                        for (int i=0;i<xMovement;i++){
-                            if (piecePresent(initialX+(i*75),initialY+(i*75))){
-                                inTheWay=true;
-                            }
-                            else inTheWay=false;
-                        }
-                    }
-                    else if((startX-landingX>0) && (startY-landingY<0)){//white to black side to the left (/)
-                        for (int i=0;i<xMovement;i++){
-                            if (piecePresent(initialX-(i*75),initialY+(i*75))){
-                                inTheWay=true;
-
-                            }
-                            else inTheWay=false;
-                        }
-                    }
-                    else if((startX-landingX)>0 && (startY-landingY)>0){//black to white going to the left(\)
-                        for (int i=0;i<xMovement;i++){
-                            if (piecePresent(initialX-(i*75),initialY-(i*75))){
-                                inTheWay=true;
-                            }
-                            else inTheWay=false;
-                        }
-                    }
-                    else{//black to white to the right(/)
-                        for (int i=0;i<xMovement;i++){
-                            if (piecePresent(initialX+(i*75),initialY-(i*75))){
-                                inTheWay=true;
-                            }
-                            else inTheWay=false;
-                        }
-                    }
-
-                    if (inTheWay){
-                        validMove=false;
-                    }
-                    else{
-                        if (piecePresent(landingX*75,landingY*75)){
-                            if (pieceName.contains("White")){
-                                if (checkWhiteOpponent(landingX*75,landingY*75 )){
-                                    validMove=true;
-                                }
-                                else validMove=false;
-                            }
-                            else{
-                                if (!checkWhiteOpponent(landingX*75,landingY*75 )){
-                                    validMove=true;
-                                }
-                                else validMove=false;
-                            }
-                        }
-                        else validMove=true;
-                    }
-                }
-
-                else validMove=false;
-
-            }
-
-        }
-        else if (pieceName.contains("King")){
-            boolean inTheWay=false;
-            if (landingX < 0 || landingX > 7 || landingY < 0 || landingY > 7) {
-                validMove = false;
-            }
-            else {
-                if ((startX==landingX)&&(startY==landingY)){
-                    validMove=false;
-                }
-                else if (xMovement<2 &&yMovement<2){
-                    if (piecePresent(landingX*75,landingY*75)){
-                        inTheWay=true;
-                    }
-                    else inTheWay=false;
-
-                    if (inTheWay){
-                        validMove=false;
-                    }
-                    else{
-                        if (piecePresent(landingX*75,landingY*75)){
-                            if (pieceName.contains("White")){
-                                if (checkWhiteOpponent(landingX*75,landingY*75 )){
-                                    validMove=true;
-                                }
-                                else validMove=false;
-                            }
-                            else{
-                                if (!checkWhiteOpponent(landingX*75,landingY*75 )){
-                                    validMove=true;
-                                }
-                                else validMove=false;
-                            }
-                        }
-                        else validMove=true;
-                    }
-                }
-
-                else validMove=false;
-            }
-
-        }
-
-
-
-
-
-        System.out.println(validMove);
-        System.out.println("---------------------");
-
 
         if (!validMove) {
             int location = 0;
@@ -689,11 +766,37 @@ public class ChessProject extends JFrame implements MouseListener, MouseMotionLi
                     pieces = new JLabel(new ImageIcon("WhiteQueen.png"));
                     parent = (JPanel) chessBoard.getComponent(location);
                     parent.add(pieces);
-                } else {
+                }
+                else {
                     Container parent = (Container) c;
                     pieces = new JLabel(new ImageIcon("WhiteQueen.png"));
                     parent = (JPanel) chessBoard.getComponent(location);
                     parent.add(pieces);
+                }
+
+                if (champion != null) {
+                    JOptionPane.showMessageDialog(null,champion);
+                    System.exit(0);
+                }
+            }
+            else if (promote) {
+                int location2 = 0 + (e.getX() / 75);
+                if (c instanceof JLabel) {
+                    Container parent = c.getParent();
+                    parent.remove(0);
+                    pieces = new JLabel(new ImageIcon("BlackQueen.png"));
+                    parent = (JPanel) chessBoard.getComponent(location2);
+                    parent.add(pieces);
+                }
+                else {
+                    Container parent = (Container) c;
+                    pieces = new JLabel(new ImageIcon("BlackQueen.png"));
+                    parent = (JPanel) chessBoard.getComponent(location2);
+                    parent.add(pieces);
+                }
+                if (champion != null) {
+                    JOptionPane.showMessageDialog(null,champion);
+                    System.exit(0);
                 }
             }
             else {
@@ -701,17 +804,21 @@ public class ChessProject extends JFrame implements MouseListener, MouseMotionLi
                     Container parent = c.getParent();
                     parent.remove(0);
                     parent.add(chessPiece);
-                } else {
+                }
+                else {
                     Container parent = (Container) c;
                     parent.add(chessPiece);
                 }
                 chessPiece.setVisible(true);
             }
-
+            if (champion != null) {
+                JOptionPane.showMessageDialog(null,champion);
+                System.exit(0);
+            }
+            makeAIMove();
         }
-        makeAIMove();
-    }
 
+    }
 
     public void mouseClicked(MouseEvent e) {
 
@@ -741,7 +848,10 @@ public class ChessProject extends JFrame implements MouseListener, MouseMotionLi
 
         //create the the Poppup box
         Object[] options = {"Random Moves", "Best Next Move", "Based on Opponents Moves"};
-        int gameOption = JOptionPane.showOptionDialog(frame, "Choose your AI opponent", "Chess Menu", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[2]);
+        gameOption = JOptionPane.showOptionDialog(frame, "Choose your AI opponent", "Chess Menu", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
+        System.out.println(gameOption);
+        ((ChessProject) frame).makeAIMove();
+
     }
 
     private String getPieceName(int x, int y){
@@ -758,6 +868,7 @@ public class ChessProject extends JFrame implements MouseListener, MouseMotionLi
             return "empty";
         }
     }
+
     private Boolean checkWhiteOponent(int newX, int newY) {
         Boolean oponent;
         Component c1 = chessBoard.findComponentAt(newX, newY);
@@ -770,20 +881,8 @@ public class ChessProject extends JFrame implements MouseListener, MouseMotionLi
             oponent = false;
         }
         return oponent;
+
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
 
     /*
   Method to check were a Black Pawn can move to. There are two main conditions here. Either the Black Pawn is in
@@ -792,8 +891,7 @@ public class ChessProject extends JFrame implements MouseListener, MouseMotionLi
   bottom of the board it turns into a Queen (this should be handled where the move is actually being made and not in this
   method).
 */
-
-        private Stack getWhitePawnSquares(int x, int y, String piece) {
+    private Stack getWhitePawnSquares(int x, int y, String piece) {
             Square startingSquare = new Square(x, y, piece);
             Stack moves = new Stack();
             Move validM, validM1, validM2, validM3;
@@ -851,9 +949,6 @@ public class ChessProject extends JFrame implements MouseListener, MouseMotionLi
             }
             return moves;
         }
-
-
-
 
     /*
       Method to check if there is a BlackKing in the surrounding squares of a given Square.
@@ -1073,7 +1168,6 @@ public class ChessProject extends JFrame implements MouseListener, MouseMotionLi
         }
         return moves;
     } // end of the method getKingSquares()
-
 
     /*
         Method to return all the possible moves that a Queen can make
@@ -1371,7 +1465,6 @@ public class ChessProject extends JFrame implements MouseListener, MouseMotionLi
         return moves;
     }
 
-
     /*
         Method fo return all the squares that a Knight can attack. The knight is possibly the simplest piece
         to get possible movements from. The Knight can essentially move in an L direction from any square on the
@@ -1418,7 +1511,6 @@ public class ChessProject extends JFrame implements MouseListener, MouseMotionLi
         return attackingMove;
     }
 
-
     /*
             Method to colour a stack of Squares
     */
@@ -1446,7 +1538,6 @@ public class ChessProject extends JFrame implements MouseListener, MouseMotionLi
         }
         colorSquares(squares);
     }
-
 
     /*
       Method to find all the White Pieces.
@@ -1500,8 +1591,6 @@ public class ChessProject extends JFrame implements MouseListener, MouseMotionLi
         return squares;
     }
 
-
-
     private void resetBorders(){
         Border empty = BorderFactory.createEmptyBorder();
         for(int i=0;i < 64;i++){
@@ -1533,9 +1622,10 @@ public class ChessProject extends JFrame implements MouseListener, MouseMotionLi
         resetBorders();
         layeredPane.validate();
         layeredPane.repaint();
-        Stack white = findWhitePieces();
+        Stack white = findWhitePieces();//gets all the white pieces
         Stack black = findBlackPieces();
-        Stack completeMoves = new Stack();
+        Stack completeWhiteMoves = new Stack();
+        Stack completeBlackMoves = new Stack();
         Move tmp;
         while (!white.empty()) {
             Square s = (Square) white.pop();
@@ -1547,29 +1637,67 @@ public class ChessProject extends JFrame implements MouseListener, MouseMotionLi
     */
             if (tmpString.contains("Knight")) {
                 tmpMoves = getKnightMoves(s.getXC(), s.getYC(), s.getName());
-            } else if (tmpString.contains("Bishop")) {
+            }
+            else if (tmpString.contains("Bishop")) {
                 tmpMoves = getBishopMoves(s.getXC(), s.getYC(), s.getName());
-            } else if (tmpString.contains("Pawn")) {
+            }
+            else if (tmpString.contains("Pawn")) {
                 tmpMoves = getWhitePawnSquares(s.getXC(), s.getYC(), s.getName());
-            } else if (tmpString.contains("Rook")) {
+            }
+            else if (tmpString.contains("Rook")) {
                 tmpMoves = getRookMoves(s.getXC(), s.getYC(), s.getName());
-            }else if (tmpString.contains("Queen")) {
+            }
+            else if (tmpString.contains("Queen")) {
                 tmpMoves = getQueenMoves(s.getXC(), s.getYC(), s.getName());
-            } else if (tmpString.contains("King")) {
+            }
+            else if (tmpString.contains("King")) {
                 tmpMoves = getKingSquares(s.getXC(), s.getYC(), s.getName());
             }
             while (!tmpMoves.empty()) {
                 tmp = (Move) tmpMoves.pop();
-                completeMoves.push(tmp);
+                completeWhiteMoves.push(tmp);
             }
         }
-        temporary = (Stack) completeMoves.clone();
+        while (!black.empty()) {
+            Square s = (Square) black.pop();
+            String tmpString = s.getName();
+            Stack tmpMoves = new Stack();
+            Stack temporary = new Stack();
+/*
+        We need to identify all the possible moves that can be made by the AI Opponent
+    */
+            if (tmpString.contains("Knight")) {
+                tmpMoves = getKnightMoves(s.getXC(), s.getYC(), s.getName());
+            }
+            else if (tmpString.contains("Bishop")) {
+                tmpMoves = getBishopMoves(s.getXC(), s.getYC(), s.getName());
+            }
+            else if (tmpString.contains("Pawn")) {
+                tmpMoves = getWhitePawnSquares(s.getXC(), s.getYC(), s.getName());
+            }
+            else if (tmpString.contains("Rook")) {
+                tmpMoves = getRookMoves(s.getXC(), s.getYC(), s.getName());
+            }
+            else if (tmpString.contains("Queen")) {
+                tmpMoves = getQueenMoves(s.getXC(), s.getYC(), s.getName());
+            }
+            else if (tmpString.contains("King")) {
+                tmpMoves = getKingSquares(s.getXC(), s.getYC(), s.getName());
+            }
+            while (!tmpMoves.empty()) {
+                tmp = (Move) tmpMoves.pop();
+                completeBlackMoves.push(tmp);
+            }
+        }
+
+
+        temporary = (Stack) completeWhiteMoves.clone();
         getLandingSquares(temporary);
         printStack(temporary);
 /*
 So now we should have a copy of all the possible moves to make in our Stack called completeMoves
 */
-        if (completeMoves.size() == 0) {
+        if (completeWhiteMoves.size() == 0) {
 /*
     In Chess if you cannot make a valid move but you are not in Check this state is referred to
     as a Stale Mate
@@ -1584,17 +1712,28 @@ So now we should have a copy of all the possible moves to make in our Stack call
     out to the standard output.
   */
             System.out.println("=============================================================");
-            Stack testing = new Stack();
+           /* Stack testing = new Stack();
             while (!completeMoves.empty()) {
                 Move tmpMove = (Move) completeMoves.pop();
                 Square s1 = (Square) tmpMove.getStart();
                 Square s2 = (Square) tmpMove.getLanding();
                 System.out.println("The " + s1.getName() + " can move from (" + s1.getXC() + ", " + s1.getYC() + ") to the following square: (" + s2.getXC() + ", " + s2.getYC() + ")");
                 testing.push(tmpMove);
-            }
+            }*/
             //System.out.println("=============================================================");
             Border redBorder = BorderFactory.createLineBorder(Color.RED, 3);
-            Move selectedMove = agent.randomMove(testing);
+
+
+            Move selectedMove;
+            switch (gameOption){
+                case 1: selectedMove=agent.nextBestMove(completeWhiteMoves,black);
+                break;
+                case 2: selectedMove=agent.twoLevelsDeep(completeWhiteMoves);
+                break;
+                default: selectedMove = agent.randomMove(completeWhiteMoves);
+            }
+
+
             Square startingPoint = (Square) selectedMove.getStart();
             Square landingPoint = (Square) selectedMove.getLanding();
             int startX1 = (startingPoint.getXC() * 75) + 20;
@@ -1642,12 +1781,5 @@ So now we should have a copy of all the possible moves to make in our Stack call
             white2Move = false;
         }
     }
-
-
-
-
-
-
-
 
 }
