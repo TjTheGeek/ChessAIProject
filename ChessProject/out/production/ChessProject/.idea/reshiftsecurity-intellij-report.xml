@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ReshiftSecurity-Intellij-Report">
     <isGitProject>true</isGitProject>
-    <projectName>ChessProject copy</projectName>
+    <projectName>ChessProject</projectName>
     <securityIssues />
   </component>
 </project>
